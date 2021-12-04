@@ -1,11 +1,11 @@
 import Foundation
 
 class BingoNode {
-  let value: Int
+  let number: Int
   var marked: Bool = false
   
-  init(value: Int) {
-    self.value = value
+  init(number: Int) {
+    self.number = number
   }
 }
 
@@ -13,14 +13,14 @@ class BingoBoard {
 
   let grid: [[BingoNode]]
 
-  private lazy var valueToCoordinates: [Int: (Int, Int)] = {
+  private lazy var numberToCoordinates: [Int: (Int, Int)] = {
     grid.enumerated()
       .reduce(into: [Int: (Int, Int)]()) { acc, row in
         acc.merge(
           row.element
             .enumerated()
             .reduce(into: [Int: (Int, Int)]()) {
-              $0[$1.element.value] = (row.offset, $1.offset)
+              $0[$1.element.number] = (row.offset, $1.offset)
             },
           uniquingKeysWith: { $1 }
         )
@@ -32,7 +32,7 @@ class BingoBoard {
       $0 + $1
         .filter { !$0.marked }
         .reduce(0, {
-          $0 + $1.value
+          $0 + $1.number
         })
     })
   }
@@ -43,12 +43,12 @@ class BingoBoard {
     self.grid = grid
   }
 
-  func check(value: Int) -> Int? {
+  func check(number: Int) -> Int? {
     guard !won else { return nil }
-    return valueToCoordinates[value].flatMap { coords in
+    return numberToCoordinates[number].flatMap { coords in
       grid[coords.0][coords.1].marked = true
       won = checkWin(from: coords)
-      return won ? score * value : nil
+      return won ? score * number : nil
     }
   }
 
@@ -64,32 +64,29 @@ class BingoGame {
   let numbers: [Int]
   let boards: [BingoBoard]
 
+  private lazy var winners: [Int] = {
+    var winners = [Int]()
+    for number in numbers {
+      for board in boards {
+        if let win = board.check(number: number) {
+          winners.append(win)
+        }
+      }
+    }
+    return winners
+  }()
+
   init(numbers: [Int], boards: [BingoBoard]) {
     self.numbers = numbers
     self.boards = boards
   }
 
   func play() -> Int? {
-    for number in numbers {
-      for board in boards {
-        if let win = board.check(value: number) {
-          return win
-        }
-      }
-    }
-    return nil
+    winners.first
   }
 
   func play2() -> Int? {
-    var scores = [Int]()
-    for number in numbers {
-      for board in boards {
-        if let win = board.check(value: number) {
-          scores.append(win)
-        }
-      }
-    }
-    return scores.last
+    winners.last
   }
 }
 
