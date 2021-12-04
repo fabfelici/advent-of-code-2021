@@ -2,9 +2,9 @@ import Foundation
 
 let input = "day2".load()
   .map {
-    $0.components(separatedBy: "\n")
+    $0.components(separatedBy: .newlines)
       .map {
-        $0.components(separatedBy: " ")
+        $0.components(separatedBy: .whitespaces)
       }
       .compactMap(parseCommand)
   }!
@@ -84,5 +84,5 @@ func solve(_ input: [Command], aiming: Bool) -> Int {
   }.score
 }
 
-print(solve(input, aiming: false))
-print(solve(input, aiming: true))
+solve(input, aiming: false)
+solve(input, aiming: true)

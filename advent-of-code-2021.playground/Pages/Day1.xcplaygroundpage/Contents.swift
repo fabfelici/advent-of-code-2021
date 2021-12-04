@@ -1,8 +1,8 @@
 import Foundation
 
-let day1 = "day1".load()
+let input = "day1".load()
   .map {
-    $0.components(separatedBy: "\n")
+    $0.components(separatedBy: .newlines)
       .compactMap(Int.init)
   }!
 
@@ -13,5 +13,5 @@ func countIncrements(_ input: [Int], window: Int) -> Int {
     }
 }
 
-print(countIncrements(day1, window: 1))
-print(countIncrements(day1, window: 3))
+countIncrements(input, window: 1)
+countIncrements(input, window: 3)
