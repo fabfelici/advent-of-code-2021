@@ -1,6 +1,8 @@
 import Foundation
 
-let input = "day6".load()!.components(separatedBy: .punctuationCharacters).compactMap(Int.init)
+let input = "day6".load()!.components(separatedBy: ",").compactMap {
+  Int($0.trimmingCharacters(in: .newlines))
+}
 
 func brute(lanterns: [Int], days: Int) -> Int {
   var newLanters = lanterns
@@ -53,10 +55,15 @@ func count(lanterns: [Int], days: Int) -> Int {
   }
 }
 
-var counts = input.reduce(into: [0,0,0,0,0,0,0,0,0]) { $0[$1] += 1 }
-for d in 0 ..< 256 {
-  if d == 80 { print(counts.reduce(0, +)) }
-  counts = counts[1...6] + [counts[0] + counts[7], counts[8], counts[0]]
+func solve(input: [Int], days: Int) -> Int {
+  var counts = input.reduce(into: [0,0,0,0,0,0,0,0,0]) { $0[$1] += 1 }
+  (0..<days)
+    .map { $0 % 9 }
+    .forEach { zeroIndex in
+      counts[(zeroIndex + 7) % 9] += counts[zeroIndex]
+    }
+  return counts.reduce(0, +)
 }
-print(counts.reduce(0, +))
-count(lanterns: input, days: 80)
+
+solve(input: input, days: 80)
+solve(input: input, days: 256)
