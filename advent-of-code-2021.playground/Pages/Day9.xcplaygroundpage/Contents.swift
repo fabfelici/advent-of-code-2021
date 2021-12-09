@@ -47,8 +47,8 @@ func solve2(input: [[Int]]) -> Int {
 }
 
 func basin(i: Int, j: Int, input: inout [[UInt8]]) -> Int {
-  guard input[i][j] != 9, input[i][j] != UInt8.max else { return 0 }
-  input[i][j] = UInt8.max
+  guard input[i][j] != 9 else { return 0 }
+  input[i][j] = 9
   return [
     j > 0 ? (i, j - 1) : nil,
     j < input[0].count - 1 ? (i, j + 1) : nil,
