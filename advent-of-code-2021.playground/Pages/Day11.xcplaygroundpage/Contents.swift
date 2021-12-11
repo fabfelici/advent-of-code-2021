@@ -11,60 +11,69 @@ let input = "day11".load()!
   }
 
 func solve1(input: [[Int]], steps: Int) -> Int {
-  var mutable = input
-  return (0..<steps).reduce(0) { acc, _ in
-    acc + tick(input: &mutable)
-  }
+  let grid = Grid(input: input)
+  return (0..<steps)
+    .map { _ in grid.tick() }
+    .reduce(0, +)
 }
 
 func solve2(input: [[Int]]) -> Int {
   var res = 1
-  var mutable = input
-  while tick(input: &mutable) != input.count * input.count {
+  let grid = Grid(input: input)
+  while grid.tick() != input.count * input.count {
     res += 1
   }
   return res
 }
 
-func tick(input: inout [[Int]]) -> Int {
-  var flashed = Set<Point>()
-  input.enumerated().forEach { row in
-    input.enumerated().forEach { column in
-      visit(point: .init(x: row.offset, y: column.offset), input: &input, flashed: &flashed)
-    }
-  }
-  return flashed.count
-}
-
 typealias Point = SIMD2<Int>
 
-let neighbors = [
-  (-1, -1),
-  (-1, 0),
-  (-1, 1),
-  (1, -1),
-  (1, 0),
-  (1, 1),
-  (0, -1),
-  (0, 1)
-]
-.map(Point.init(x:y:))
+class Grid {
 
-func visit(point: Point, input: inout [[Int]], flashed: inout Set<Point>) {
-  guard !flashed.contains(point),
-    (0..<input.count).contains(point.x),
-    (0..<input.count).contains(point.y) else { return }
-  guard input[point.x][point.y] == 9 else {
-    input[point.x][point.y] += 1
-    return
+  let neighbors = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+    (0, -1),
+    (0, 1)
+  ]
+  .map(Point.init(x:y:))
+
+  private var input: [[Int]]
+  private var flashed = Set<Point>()
+
+  init(input: [[Int]]) {
+    self.input = input
   }
-  input[point.x][point.y] = 0
-  flashed.insert(point)
-  neighbors
-    .map { point &+ $0 }
-    .forEach {
-      visit(point: $0, input: &input, flashed: &flashed)
+
+  func tick() -> Int {
+    flashed = Set<Point>()
+    input.enumerated().flatMap { row in
+      input.enumerated().map { column in
+        Point(x: row.offset, y: column.offset)
+      }
     }
+    .forEach(visit)
+    return flashed.count
+  }
+
+  private func visit(point: Point) {
+    guard !flashed.contains(point),
+      input.indices.contains(point.x),
+      input.indices.contains(point.y) else { return }
+    guard input[point.x][point.y] == 9 else {
+      input[point.x][point.y] += 1
+      return
+    }
+    input[point.x][point.y] = 0
+    flashed.insert(point)
+    neighbors
+      .map { point &+ $0 }
+      .forEach(visit)
+  }
 }
 
 solve1(input: input, steps: 100)
